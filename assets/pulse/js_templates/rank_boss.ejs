@@ -1,0 +1,361 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	$('.monster').each(function() {
+		App.initializeTooltip($(this), false);
+	});
+	$('#select_period').on('click', function() {
+		var period = $('#week :selected').val();
+		App.populateRanking('boss', '<%= server_selected %>', period);
+	});
+});
+
+var scrollDuration = 300;
+var monsters = document.getElementById('monsters');
+if (typeof(monsters) != 'undefined' && monsters != null){
+	var leftPaddle = document.getElementById('left-paddle');
+	var rightPaddle = document.getElementById('right-paddle');
+	var itemsLength = document.getElementsByClassName('mitem').length;
+
+	var itemSize = 100;
+	var paddleMargin = 20;
+	var getMonstersWrapperSize = function() {
+		return document.getElementsByClassName('monster-wrapper')[0].clientWidth;
+	}
+
+	var monstersWrapperSize = getMonstersWrapperSize();
+	var monstersVisibleSize = monstersWrapperSize;
+
+	var getMonstersSize = function() {
+		return itemsLength * itemSize;
+	};
+	var monstersSize = monsters.scrollWidth;
+	var monstersInvisibleSize = monstersSize - monstersWrapperSize;
+
+	var getMonstersPosition = function() {
+		return document.getElementById('monsters').scrollLeft;
+	};
+
+	var monstersPosition = getMonstersPosition();
+	var monstersEndOffset = monstersInvisibleSize - paddleMargin;
+
+	if (monstersPosition < monstersEndOffset) {
+		if (monstersPosition <= paddleMargin) {
+			leftPaddle.classList.add('d-none');
+		} else {
+			leftPaddle.classList.remove('d-none');
+		}
+		rightPaddle.classList.remove('d-none');
+		} else if (monstersPosition >= monstersEndOffset) {
+			if (monstersPosition <= paddleMargin) {
+			leftPaddle.classList.add('d-none');
+		}
+			rightPaddle.classList.add('d-none');
+	}
+
+	document.getElementById('monsters').addEventListener('scroll', function() {
+		monstersInvisibleSize = monstersSize - monstersWrapperSize;
+		var monstersPosition = getMonstersPosition();
+
+		var monstersEndOffset = monstersInvisibleSize - paddleMargin;
+
+		if (monstersPosition <= paddleMargin) {
+			leftPaddle.classList.add('d-none');
+			rightPaddle.classList.remove('d-none');
+		} else if (monstersPosition < monstersEndOffset) {
+			leftPaddle.classList.remove('d-none');
+			rightPaddle.classList.remove('d-none');
+		} else if (monstersPosition >= monstersEndOffset) {
+			leftPaddle.classList.remove('d-none');
+			rightPaddle.classList.add('d-none');
+		}
+	});
+
+	rightPaddle.addEventListener('click', function() {
+	  let sl = document.getElementById('monsters').scrollLeft,
+		  cw = document.getElementById('monsters').scrollWidth;
+		
+	  if ((sl + 220) >= cw) {
+		document.getElementById('monsters').scrollTo(cw, 0);
+	  } else {
+		document.getElementById('monsters').scrollTo((sl + 220), 0);
+	  }
+	});
+
+	leftPaddle.addEventListener('click', function() {
+	  let sl = document.getElementById('monsters').scrollLeft;
+		
+	  if ((sl - 220) <= 0) {
+		document.getElementById('monsters').scrollTo(0, 0);
+	  } else {
+		document.getElementById('monsters').scrollTo((sl - 220), 0);
+	  }
+	});
+}
+</script>
+<div class="blog-meta has-border bg-major-black">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="blog-title text-white font-theme h4 mt-10 mt-25-sm mb-10 mb-20-sm">
+                &nbsp; <a> <%= App.lc.translate('Top Boss Slayers').fetch() %></a>
+            </h2>
+        </div>
+    </div>
+</div>
+<div class="blog-content bg-major-black">
+<% 
+if(typeof boss != 'undefined'){ 
+if(boss != false){
+%>
+<table class="rank-rewards">
+	<tbody>
+		<tr>
+			<th>
+				<%= App.lc.translate('1st Boss Slayer').fetch() %>
+			</th>
+			<th>
+				<%= App.lc.translate('2nd Boss Slayer').fetch() %>
+			</th>
+			<th>
+				<%= App.lc.translate('3rd Boss Slayer').fetch() %>
+			</th>
+		</tr>
+		<tr>
+			<% 
+			var keys = 3;
+			for(var i=0; i<3; i++) {
+			if (i in boss[0]){
+			%>
+			<td>
+				<img style="vertical-align: middle;" src="<%= base_url %>assets/<%= tmp_dir %>/images/icons/place-<%= i+1 %>.png" alt="">
+				<span><a href="<%= base_url %>character/<%= boss[0][i].name_hex %>/<%= server_selected %>"><%= boss[0][i].name %></a></span>
+				<br />
+				<%= App.lc.translate('Rewards').fetch() %>: <span style="color: #e3f20f;">x<%= keys %></span> 
+				<img style="vertical-align: middle;" src="<%= base_url %>assets/<%= tmp_dir %>/images/icons/mys-keys<%= i+1 %>.png?v1"> 
+				<br />
+				<span style="text-align: center; font-size: 16px;"><%= App.lc.translate('Mystery Keys').fetch() %></span>
+			</td>
+			<% 
+				keys = keys - 1;
+			}
+			} 
+			%>
+		</tr>
+	</tbody>
+</table>
+<%
+}
+} 
+%>
+<div class="mt-4"></div>
+<div class="text-center" style="font-size: 18px; color:#fff;">
+	<%= App.lc.translate('Season ends in').fetch() %>: 
+	<span style="font-weight:bold;color:#ff9f4a;" id="countdownBoss"></span>
+</div>
+<script type="text/javascript">
+	$(document).ready(function () {
+		App.castleSiegeCountDown("countdownBoss", <%= boss.countdown_reset %>, <%= t %>);
+	});
+</script>
+<div class="mt-4"></div>
+<div class="boss-points-scroll boss-points-scrollbar">
+	<div class="boss-points-container">
+		<table class="table w-100 lh-base fs-13 mb-20">
+			<thead>
+				<tr class="text-white">
+					<th class="border-bt-1"><%= App.lc.translate('Boss Name').fetch() %></th>
+					<th class="border-bt-1"><%= App.lc.translate('Points Per Kill').fetch() %></th>
+					<th class="border-bt-1"><%= App.lc.translate('Status').fetch() %></th>
+				</tr>
+			</thead>
+			<tbody>
+			<% for(var i=0; i<boss[1].length; i++) { %>
+			<tr>
+				<td class="block-boss-rank monster border-bt-1" style="text-align:left;" data-info='<%= boss[1][i].tooltip %>'>
+					<span><%= i+1 %></span>
+					<img style="vertical-align: middle; width: 65px; height: 65px;" src="<%= base_url %>assets/default_assets/images/Boss/<%= boss[1][i].id %>.png?v1" title="<%= boss[1][i].name %>">
+					<span style="white-space: nowrap;"><%= boss[1][i].name %></span>
+				</td>
+				<td class="border-bt-1" style="color: #e3f20f; font-weight: bold; text-align:center; height: 80px!important;vertical-align:middle;"><%= boss[1][i].points %></td>
+				<td class="border-bt-1" style="text-align:left; height: 80px!important; vertical-align:middle;">
+					<span style="color: #fff;"><%= App.lc.translate('Last killed by').fetch() %>: <span class="color-orange"><%= boss[3][boss[1][i].id].name %></span></span><br />
+					<span style="color: var(--default-color);"><%= App.lc.translate('Spawn time').fetch() %>: <%= boss[3][boss[1][i].id].next_regen %></span>
+				</td>
+			</tr>  
+			<% } %>
+			</tbody>
+		</table> 
+	</div>
+</div>
+<div class="mt-4"></div>
+<div class="row" style="padding: 10px 0px 20px 30px">
+	<div class="col-lg-4 fields">
+		<div class="form-group">
+			<select name="week" id="week" class="form-control bg-light-dark text-white" style="padding: 3px 30px;">
+				<option value="2024-07-29 00:01:00~2024-08-04 23:59:00"><%= App.lc.translate('July').fetch() %>-29 ~ August-04 2024</option>
+				<option value="2024-07-22 00:01:00~2024-07-28 23:59:00"><%= App.lc.translate('July').fetch() %>-22 ~ 28 2024</option>
+			</select>
+			</div>
+	</div>
+	<div class="col-lg-2 fields">
+		<button id="select_period" class="vs-btn2 gradient-btn h4" type="submit"><%= App.lc.translate('OK').fetch() %></button>
+	</div>
+</div>
+<% 
+if(typeof boss != 'undefined'){ 
+if(boss != false){
+%>
+<div class="mt-4"></div>
+<div style="overflow: auto;">
+	<table class="table w-100 lh-base fs-13 mb-20">
+		<thead>
+			<tr class="text-white">
+				<th class="border-bt-1" style="width: 200px!important;"><%= App.lc.translate('Name').fetch() %></th>
+				<th class="border-bt-1" style="width: 560px!important;"><%= App.lc.translate('Slayed Bosses').fetch() %></th>
+			</tr>
+		</thead>
+		<tbody>
+		<% 
+		for(var i=0; i<3; i++) {
+			if (i in boss[0]){
+		%>
+		<tr>
+			<td class="border-bt-1">
+				<div class="row">
+				<div class="col-md-6 text-boss-end block-boss-ava">
+					<span><i><%= i+1 %></i></span>
+					<div class="ClassAvatar">
+					<div class="ClassAvatar-frame-boss ClassAvatar-top<%= i+1 %>">
+					<img src="<%= base_url %>assets/default_assets/images/char_icons/<%= boss[0][i].class_small.toLowerCase() %>.jpg" title="<%= boss[0][i].class %>">
+					</div>
+					
+					
+					</div>
+				</div>
+				<div class="col-md-6 text-boss-start">
+					<div class="col-md-12" style="white-space: nowrap;">
+						<a href="<%= base_url %>character/<%= boss[0][i].name_hex %>/<%= server_selected %>">
+							<span class="glow"><%= boss[0][i].name %></span>
+						</a>
+						<% if(boss[0][i].status == 1){ %>
+							<img style="width: 10px; height: 10px; top: 0px; left: 3px;" src="<%= base_url %>assets/<%= tmp_dir %>/images/online.png" title="Online" />
+							<% }else{ %>
+							<img style="width: 10px; height: 10px; top: 0px; left: 3px;" src="<%= base_url %>assets/<%= tmp_dir %>/images/offline.png" title="Offline" />
+						<% } %>							
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= boss[0][i].class %></span>
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= App.lc.translate('Level').fetch() %>: <%= boss[0][i].level %></span>
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= App.lc.translate('Guild').fetch() %>: <% if(boss[0][i].g_name != '') { %><%= boss[0][i].g_name %><% } else { %> <span style="color:#42f5dd;"><%= App.lc.translate('None').fetch() %></span> <% } %></span>
+					</div>
+					<div class="col-md-12" style="padding: 8px 0 0 0;">
+						<span class="text-boss-muted" style="color: #e3f20f!important; font-size: 12px; font-weight: bold;">
+						<img src="<%= base_url %>assets/default_assets/images/boss-rank-points.png?v1" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px; top: -1px; left: 2px;"> 
+						<%= App.lc.translate('Score').fetch() %>: <%= boss[0][i].score %></span>
+					</div>
+				</div>
+				</div>
+			</td>
+			<td class="border-bt-1">
+				<div class="monster-wrapper">
+					<ul id="monsters">
+						<% for(var a in boss[2][boss[0][i].name]){ %>
+						<li class="mitem monster text-center" data-info='<%= boss[2][boss[0][i].name][a].tooltip %>'>
+							<img src="<%= base_url %>assets/default_assets/images/Boss/<%= boss[2][boss[0][i].name][a].id %>.png" style="width:50px !important;max-width: 50px;">
+							<div></div>
+							<b>x<%= boss[2][boss[0][i].name][a].count %></b>
+						</li>
+						<% } %>			
+					</ul>
+					<div class="paddles">
+						<button id="left-paddle" class="paddle d-none arrow prev active"></button>
+						<button id="right-paddle" class=" paddle d-none arrow next"></button>
+					</div>
+				</div>
+			</td>
+		</tr>  
+		<% }} %>
+		<% for(var i=3; i<boss[0].length; i++) { %>
+		<tr>
+			<td class="border-bt-1">
+				<div class="row">
+				<div class="col-md-6 text-boss-end block-boss-ava">
+					<span><i><%= i+1 %></i></span>
+					<div class="ClassAvatar">
+					<div class="ClassAvatar-frame-boss ClassAvatar-top30">
+					<img src="<%= base_url %>assets/default_assets/images/char_icons/<%= boss[0][i].class_small.toLowerCase() %>.jpg" title="<%= boss[0][i].class %>">
+					</div>
+					
+					</div>
+				</div>
+				<div class="col-md-6 text-boss-start">
+					<div class="col-md-12">
+						<a href="<%= base_url %>character/<%= boss[0][i].name_hex %>/<%= server_selected %>">
+							<%= boss[0][i].name %>
+						</a>
+						<% if(boss[0][i].status == 1){ %>
+							<img style="width: 10px; height: 10px; top: 0px; left: 3px;" src="<%= base_url %>assets/<%= tmp_dir %>/images/online.png" title="Online" />
+							<% }else{ %>
+							<img style="width: 10px; height: 10px; top: 0px; left: 3px;" src="<%= base_url %>assets/<%= tmp_dir %>/images/offline.png" title="Offline" />
+						<% } %>						
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= boss[0][i].class %></span>
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= App.lc.translate('Level').fetch() %>: <%= boss[0][i].level %></span>
+					</div>
+					<div class="col-md-12">
+						<span class="text-boss-muted" style="font-size:12px;"><%= App.lc.translate('Guild').fetch() %>: <% if(boss[0][i].g_name != '') { %><%= boss[0][i].g_name %><% } else { %> <span style="color:#42f5dd;"><%= App.lc.translate('None').fetch() %></span> <% } %></span>
+					</div>
+					<div class="col-md-12" style="padding: 8px 0 0 0;">
+						<span class="text-boss-muted" style="color: #e3f20f!important; font-size: 12px; font-weight: bold;">
+						<img src="<%= base_url %>assets/default_assets/images/boss-rank-points.png?v1" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px; top: -1px; left: 2px;"> 
+						<%= App.lc.translate('Score').fetch() %>: <%= boss[0][i].score %></span>
+					</div>
+				</div>
+				</div>
+			</td>
+			<td class="border-bt-1">
+				<div class="monster-wrapper">
+					<ul id="monsters">
+						<% for(var a in boss[2][boss[0][i].name]){ %>
+						<li class="mitem monster text-center" data-info='<%= boss[2][boss[0][i].name][a].tooltip %>'>
+							<img src="<%= base_url %>assets/default_assets/images/Boss/<%= boss[2][boss[0][i].name][a].id %>.png" style="width:50px !important;max-width: 50px;">
+							<div></div>
+							<b>x<%= boss[2][boss[0][i].name][a].count %></b>
+						</li>
+						<% } %>			
+					</ul>
+					<div class="paddles">
+						<button id="left-paddle" class="paddle d-none arrow prev active"></button>
+						<button id="right-paddle" class=" paddle d-none arrow next"></button>
+					</div>
+				</div>
+			</td>
+		</tr>  
+		<% } %>		
+		</tbody>
+	</table>  
+</div>
+<% if(typeof cache_time != 'undefined'){ %>
+<div class="text-default float-right"><%= cache_time %></div>
+<% } %>
+<% 
+}
+else{
+%>
+<div class="alert-danger">
+	<div class="content-danger">
+		<div><strong><%= App.lc.translate('Error').fetch() %>!</strong> <%= App.lc.translate('No Players Found').fetch() %></div>
+	</div>
+</div>
+<%
+}
+} 
+%>
+</div>
+

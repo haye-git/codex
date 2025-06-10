@@ -1,0 +1,41 @@
+<% 
+if(typeof pvp != 'undefined'){ 
+if(pvp != false){
+%>
+<table class="ranking-table">
+	<thead>
+	<tr class="main-tr">
+		<th style="text-align:center;">#</th>
+		<th style="text-align:center;"><%= App.lc.translate('Name').fetch() %></th>
+		<th style="text-align:center;"><%= App.lc.translate('Class').fetch() %></th>
+		<th style="text-align:center;">Kills</th>
+		<th style="text-align:center;"><%= App.lc.translate('Guild').fetch() %></th>
+		<th style="text-align:center;"><%= App.lc.translate('Level').fetch() %></th>
+	</tr>
+	<tbody>
+	<% for(var i=0; i< pvp.length; i++) { %>
+	<tr>
+		<td style="text-align:center; width: 10%;"><%= i+1 %> <% if(config.pvp.display_country == 1) { %><span class="f16"><span class="flag <%= pvp[i].country %>"></span></span><% } %></td>
+		<td><a href="<%= base_url %>character/<%= bin2hex(pvp[i].name) %>/<%= server_selected %>"><%= pvp[i].name %></a></td>
+		<td style="text-align:center;"><%= pvp[i].Class %></td>
+		<td style="text-align:center;"><%= pvp[i].score %></td>
+
+		<td style=" width: 20%;"><% if(pvp[i].G_Mark != '') { %><a href="<%= base_url %>guild/<%= bin2hex(pvp[i].Guild) %>/<%= server_selected %>"><%= pvp[i].Guild %></a> <img src="<%= base_url %>rankings/get_mark/<%= pvp[i].G_Mark %>" style="border: 0;" /><% } %></td>
+
+		<td style="text-align:center;"><%= pvp[i].Level %></td>
+	</tr>  
+	<% } %>
+	</tbody>
+</table>  
+<% if(typeof cache_time != 'undefined'){ %>
+<div style="text-align: right;padding-top: 15px;"><%= cache_time %></div>
+<% } %>
+<% 
+}
+else{
+%>
+<div style="padding: 0 30px 0px 50px;"><div class="i_note"><%= App.lc.translate('No Players Found').fetch() %></div></div>
+<%
+}
+} 
+%>
