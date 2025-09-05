@@ -1,0 +1,22 @@
+# Ignore Windows user folders
+AppData/
+Downloads/
+Documents/
+Desktop/
+Pictures/
+Videos/
+Music/
+OneDrive/
+
+# Ignore editors and IDE files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# System files
+Thumbs.db
+Desktop.ini
+
